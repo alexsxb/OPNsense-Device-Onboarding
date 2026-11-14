@@ -79,6 +79,31 @@ class PermanentController extends ApiControllerBase
         return [$byMac, $usedIps, $usedHosts];
     }
 
+    /**
+     * Active Dnsmasq IPv4 leases: ip => mac. Dnsmasq does not hand out an
+     * address that is still leased to another client, even if it is reserved.
+     */
+    private static function activeLeases()
+    {
+        $leases = [];
+        $now = time();
+        $data = @file_get_contents('/var/db/dnsmasq.leases');
+        foreach (explode("\n", (string)$data) as $line) {
+            $parts = preg_split('/\s+/', trim($line));
+            if (count($parts) < 3 || $parts[0] === 'duid') {
+                continue;
+            }
+            if (filter_var($parts[2], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
+                continue;
+            }
+            if ((int)$parts[0] !== 0 && (int)$parts[0] < $now) {
+                continue;
+            }
+            $leases[$parts[2]] = strtolower($parts[1]);
+        }
+        return $leases;
+    }
+
     private function loadAliases($gs, $aliasMdl)
     {
         if ((string)$gs->alias_ipv4 === '' || (string)$gs->alias_mac === '') {
@@ -93,7 +118,11 @@ class PermanentController extends ApiControllerBase
     {
         $backend = new Backend();
         if ($dnsChanged) {
-            $backend->configdRun('dnsmasq restart');
+            /* same order as the core: stop, regenerate the configuration, start
+             * ("dnsmasq restart" can start before the new configuration exists) */
+            $backend->configdRun('dnsmasq stop');
+            $backend->configdpRun('template reload', ['OPNsense/Dnsmasq']);
+            $backend->configdRun('dnsmasq start');
         }
         if ($aliasChanged) {
             $backend->configdRun('template reload OPNsense/Filter');
@@ -166,6 +195,11 @@ class PermanentController extends ApiControllerBase
             return ['status' => 'failed', 'message' => 'permanent access is not configured: select an existing IPv4 host alias and MAC alias in the settings'];
         }
         [$byMac, $usedIps, $usedHosts] = self::reservations($dns);
+        $leases = self::activeLeases();
+        if ($wantIp !== '' && isset($leases[$wantIp]) && $leases[$wantIp] !== $mac) {
+            Config::getInstance()->unlock();
+            return ['status' => 'failed', 'message' => "$wantIp is currently leased to " . $leases[$wantIp]];
+        }
 
         /* hostname: request, else what the watcher saw in the lease */
         $host = trim((string)$this->request->getPost('host'));
@@ -210,8 +244,9 @@ class PermanentController extends ApiControllerBase
             } else {
                 $ip = '';
                 for ($i = $start; $i !== false && $i <= $end; $i++) {
-                    if (!isset($usedIps[long2ip($i)])) {
-                        $ip = long2ip($i);
+                    $candidate = long2ip($i);
+                    if (!isset($usedIps[$candidate]) && (!isset($leases[$candidate]) || $leases[$candidate] === $mac)) {
+                        $ip = $candidate;
                         break;
                     }
                 }
