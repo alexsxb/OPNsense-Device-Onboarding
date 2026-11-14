@@ -49,7 +49,30 @@ new MAC in DHCP pool ──► watcher ──► pf anchor "deviceonboarding"
   stay blocked during the window, so new devices reach the internet but not
   your other networks.
 - The plugin registers the anchor in the ruleset only while it is enabled.
-- IPv4 only. Addresses outside the pool (your reservations) never get a window.
+- Addresses outside the pool (your reservations) never get a window.
+
+### IPv6 (optional, since 1.1.0)
+
+IPv6 addresses are formed by the devices themselves (SLAAC, privacy
+addresses), so they are not in the DHCP lease file. With *Allow IPv6* enabled,
+the watcher looks up the global IPv6 addresses of every device with an open
+window in the NDP table (`ndp -an`) every 15 seconds and adds them to the
+table `<onboarding6>`; new privacy addresses are picked up while the window is
+open. All of them are removed when the window closes.
+
+```
+pass in log quick on <if> [route-to (<gw-if> <gw-addr>)] inet6
+     from <onboarding6> to ! <onboarding6_internal>
+```
+
+- The window is still triggered by the DHCPv4 lease (the MAC address is the key).
+  IPv6-only devices without a DHCPv4 lease do not get a window.
+- *Excluded IPv6 networks* defaults to ULA, link-local and multicast. Add your
+  own global prefixes so new devices cannot reach your other networks.
+- *IPv6 gateway* (optional) adds `route-to`. Use it when the prefix of the
+  interface is not routed via the default IPv6 gateway, for example with a
+  tunnel broker. Without it, the regular routing applies.
+- A new privacy address can take up to 15 seconds until it is allowed.
 
 ![Known devices](docs/screenshots/known-devices.png)
 
@@ -121,6 +144,9 @@ settings are part of `config.xml` and come back with a configuration restore.
 | Pool start / end | Dynamic DHCP range. Only leases inside get a window |
 | Duration | Window length in minutes (1–1440) |
 | Excluded networks | Destinations that stay blocked during the window |
+| Allow IPv6 | Also allow IPv6 during the window (addresses from the NDP table) |
+| Excluded IPv6 networks | IPv6 destinations that stay blocked during the window |
+| IPv6 gateway | Optional gateway for the window traffic (`route-to`) |
 | Kill states on close | Drop open connections when a window closes |
 | Log | Log traffic passed by the setup rule |
 | IPv4 alias / MAC alias | Existing aliases for permanent access (empty = feature off) |
@@ -146,7 +172,8 @@ settings are part of `config.xml` and come back with a configuration restore.
 
 ```sh
 sudo pfctl -a deviceonboarding -s rules                  # rule loaded?
-sudo pfctl -a deviceonboarding -t onboarding -T show     # open windows
+sudo pfctl -a deviceonboarding -t onboarding -T show     # open windows (IPv4)
+sudo pfctl -a deviceonboarding -t onboarding6 -T show    # open windows (IPv6)
 sudo /usr/local/opnsense/scripts/deviceonboarding/ctl.py list
 grep deviceonboarding /var/log/system/latest.log
 ```

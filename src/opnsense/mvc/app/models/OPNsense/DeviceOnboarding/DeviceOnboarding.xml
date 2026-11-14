@@ -1,6 +1,6 @@
 <model>
     <mount>//OPNsense/deviceonboarding</mount>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <description>Device Onboarding: temporary internet access for newly seen devices, permanent access via firewall aliases</description>
     <items>
         <enabled type="BooleanField">
@@ -34,6 +34,30 @@
             <FieldSeparator>,</FieldSeparator>
             <AddressFamily>ipv4</AddressFamily>
         </internal_networks>
+        <ipv6_enabled type="BooleanField">
+            <Default>0</Default>
+            <Required>Y</Required>
+        </ipv6_enabled>
+        <internal_networks6 type="NetworkField">
+            <Default>fc00::/7,fe80::/10,ff00::/8</Default>
+            <Required>Y</Required>
+            <AsList>Y</AsList>
+            <FieldSeparator>,</FieldSeparator>
+            <AddressFamily>ipv6</AddressFamily>
+        </internal_networks6>
+        <gateway6 type="ModelRelationField">
+            <Model>
+                <gateway>
+                    <source>OPNsense.Routing.Gateways</source>
+                    <items>gateway_item</items>
+                    <display>name</display>
+                    <filters>
+                        <ipprotocol>/^inet6$/</ipprotocol>
+                    </filters>
+                </gateway>
+            </Model>
+            <Required>N</Required>
+        </gateway6>
         <kill_states type="BooleanField">
             <Default>1</Default>
             <Required>Y</Required>

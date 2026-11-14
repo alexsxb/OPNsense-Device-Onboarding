@@ -5,6 +5,11 @@
     "pool_end": "{{ OPNsense.deviceonboarding.pool_end|default('') }}",
     "duration": {{ OPNsense.deviceonboarding.duration|default('10') }},
     "internal_networks": "{{ OPNsense.deviceonboarding.internal_networks|default('10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,169.254.0.0/16') }}",
+    "ipv6_enabled": {{ 'true' if OPNsense.deviceonboarding.ipv6_enabled|default('0') == '1' else 'false' }},
+    "internal_networks6": "{{ OPNsense.deviceonboarding.internal_networks6|default('fc00::/7,fe80::/10,ff00::/8') }}",
+{% set gw6 = helpers.getUUID(OPNsense.deviceonboarding.gateway6) if OPNsense.deviceonboarding.gateway6|default('') else {} %}
+    "gateway6_interface": "{{ helpers.physical_interface(gw6.interface) if gw6 and gw6.interface else '' }}",
+    "gateway6_address": "{{ gw6.gateway if gw6 and gw6.gateway else '' }}",
     "kill_states": {{ 'true' if OPNsense.deviceonboarding.kill_states|default('1') == '1' else 'false' }},
     "log": {{ 'true' if OPNsense.deviceonboarding.log|default('1') == '1' else 'false' }}
 }

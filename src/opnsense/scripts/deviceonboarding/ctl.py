@@ -45,7 +45,7 @@ def main(argv):
         with common.locked_state(readonly=True) as state:
             opened = [
                 {'ip': ip, 'mac': e.get('mac'), 'host': e.get('host', ''), 'since': e.get('since'),
-                 'until': e.get('until'), 'remaining': max(0, e.get('until', 0) - now)}
+                 'until': e.get('until'), 'remaining': max(0, e.get('until', 0) - now), 'ip6': e.get('ip6', [])}
                 for ip, e in sorted(state['open'].items())
             ]
             seen = [dict(v, mac=k) for k, v in sorted(state['seen'].items(), key=lambda kv: -kv[1].get('first', 0))]
@@ -66,6 +66,8 @@ def main(argv):
             mac = (lease or {}).get('mac') or entry.get('mac') or 'manual'
             host = (lease or {}).get('host') or entry.get('host', '')
             common.open_window(state, ip, mac, host, minutes)
+            if conf.get('interface'):
+                common.sync_ipv6(state, conf)
             until = state['open'][ip]['until']
         out({'status': 'ok', 'ip': ip, 'until': until})
 

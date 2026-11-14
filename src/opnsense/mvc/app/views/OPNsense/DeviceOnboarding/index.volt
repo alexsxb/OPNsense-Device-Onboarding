@@ -46,7 +46,9 @@
             const openBody = $('#gs_open tbody').empty();
             (data.open || []).forEach(function (row) {
                 openBody.append($('<tr/>').append(
-                    $('<td/>').text(row.ip), $('<td/>').text(row.mac), $('<td/>').text(row.host || ''),
+                    $('<td/>').text(row.ip),
+                    $('<td/>').html((row.ip6 || []).map(escapeHtml).join('<br/>') || '<span class="text-muted">–</span>'),
+                    $('<td/>').text(row.mac), $('<td/>').text(row.host || ''),
                     $('<td/>').text(fmtRemaining(row.remaining)),
                     $('<td/>').html(
                         btn('btn-default gs-extend', {ip: row.ip}, 'fa-plus', '{{ lang._('Extend') }}') +
@@ -56,7 +58,7 @@
                 ));
             });
             if (!(data.open || []).length) {
-                openBody.append('<tr><td colspan="5">{{ lang._('No open windows.') }}</td></tr>');
+                openBody.append('<tr><td colspan="6">{{ lang._('No open windows.') }}</td></tr>');
             }
 
             const seenBody = $('#gs_seen tbody').empty();
@@ -200,7 +202,7 @@
     <div id="gs_error" class="alert alert-warning" style="display: none;"></div>
     <table id="gs_open" class="table table-condensed table-striped">
         <thead><tr>
-            <th>{{ lang._('IP address') }}</th><th>{{ lang._('MAC address') }}</th>
+            <th>{{ lang._('IPv4 address') }}</th><th>{{ lang._('IPv6 addresses') }}</th><th>{{ lang._('MAC address') }}</th>
             <th>{{ lang._('Hostname') }}</th><th>{{ lang._('Remaining') }}</th><th></th>
         </tr></thead>
         <tbody></tbody>

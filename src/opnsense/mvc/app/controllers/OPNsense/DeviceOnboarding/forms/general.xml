@@ -38,6 +38,26 @@
         <help>Destinations that stay blocked during the window (internal networks).</help>
     </field>
     <field>
+        <id>deviceonboarding.ipv6_enabled</id>
+        <label>Allow IPv6</label>
+        <type>checkbox</type>
+        <help>Also allow IPv6 during the window. The global IPv6 addresses of the device are taken from the NDP table while the window is open (SLAAC and privacy addresses included).</help>
+    </field>
+    <field>
+        <id>deviceonboarding.internal_networks6</id>
+        <label>Excluded IPv6 networks</label>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>IPv6 destinations that stay blocked during the window. Add your own prefixes here (for example your delegated or routed prefix).</help>
+    </field>
+    <field>
+        <id>deviceonboarding.gateway6</id>
+        <label>IPv6 gateway</label>
+        <type>dropdown</type>
+        <help>Optional. Send the window traffic through this IPv6 gateway (policy routing, route-to). Needed when the prefix of the interface is not routed via the default IPv6 gateway, for example with a tunnel broker.</help>
+    </field>
+    <field>
         <id>deviceonboarding.kill_states</id>
         <label>Kill states on close</label>
         <type>checkbox</type>

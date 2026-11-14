@@ -87,4 +87,34 @@ with common.locked_state() as st:
     assert not common.is_new_contact(st, old_lease), 'stale lease must not open a window'
     assert common.is_new_contact(st, new_lease), 'renewed lease must open a window'
     assert 'aa:bb:cc:00:00:01' not in st['forgotten']
+# IPv6: NDP parsing, rules with route-to, sync and close
+ndp_out = '''Neighbor                             Linklayer Address  Netif Expire    S Flags
+fe80::1266:6aff:fe62:4bd6%bridge0    aa:bb:cc:00:00:01 bridge0 23h45m50s S
+2001:db8:50::1a2b                    aa:bb:cc:00:00:01 bridge0 23h45m50s S
+2001:db8:50::77                      AA:BB:CC:00:00:01 bridge0 10s       R
+2001:db8:50::1                       58:9c:fc:10:96:5c bridge0 permanent R
+2001:db8:99::5                       aa:bb:cc:00:00:01 bridge1 10s       R
+2001:db8:50::dead                    (incomplete)      bridge0 expired   N
+'''
+n = common.read_ndp('bridge0', ndp_out)
+assert n['aa:bb:cc:00:00:01'] == ['2001:db8:50::1a2b', '2001:db8:50::77'], n
+assert '(incomplete)' not in n
+conf6 = dict(conf, ipv6_enabled=True, internal_networks6=['fc00::/7', 'fe80::/10'],
+             gateway6_interface='wg0', gateway6_address='2001:db8:ffff::1')
+r6 = common.anchor_rules(conf6); print(r6)
+assert 'pass in log quick on bridge0 route-to (wg0 2001:db8:ffff::1) inet6 from <onboarding6> to ! <onboarding6_internal>' in r6
+assert 'inet6' not in common.anchor_rules(conf), 'IPv6 rule must only exist when enabled'
+assert 'route-to' not in common.anchor_rules(dict(conf6, gateway6_interface='', gateway6_address=''))
+open(calls, 'w').close()
+with common.locked_state() as st:
+    st['open'] = {}
+    common.open_window(st, '192.168.50.150', 'aa:bb:cc:00:00:01', 'new1', 10)
+    common.sync_ipv6(st, conf6, ndp=n)
+    assert st['open']['192.168.50.150']['ip6'] == ['2001:db8:50::1a2b', '2001:db8:50::77']
+    common.sync_ipv6(st, conf6, ndp=n)    # nothing new -> no second add
+    common.close_window(st, '192.168.50.150', True)
+log6 = open(calls).read(); print(log6)
+assert log6.count('-t onboarding6 -T add') == 1
+assert '-t onboarding6 -T delete 2001:db8:50::1a2b 2001:db8:50::77' in log6
+assert '-k 2001:db8:50::77' in log6
 print('ALL TESTS PASSED')

@@ -40,7 +40,7 @@ def main():
         if not state.get('initialized'):
             n = common.baseline(state, common.read_leases(), conf)
             common.log(f'baseline: {n} existing devices recorded as known')
-        common.load_anchor(conf, state['open'].keys())
+        common.load_anchor(conf, state['open'])
     common.log(f'started: interface {conf["interface"]}, pool {conf["pool_start"]}-{conf["pool_end"]}, '
               f'{conf["duration"]} min')
 
@@ -54,7 +54,7 @@ def main():
 
             with common.locked_state() as state:
                 if reload_anchor or not common.anchor_loaded():
-                    common.load_anchor(conf, state['open'].keys())
+                    common.load_anchor(conf, state['open'])
 
                 now = int(time.time())
                 for lease in common.read_leases():
@@ -68,6 +68,8 @@ def main():
                         state['seen'][mac].update({'last': now, 'ip': ip})
                         if host:
                             state['seen'][mac]['host'] = host
+
+                common.sync_ipv6(state, conf)
 
                 for ip, entry in list(state['open'].items()):
                     if entry['until'] <= now:
