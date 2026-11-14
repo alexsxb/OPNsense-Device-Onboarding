@@ -1,0 +1,5 @@
+<menu>
+    <Services>
+        <DeviceOnboarding VisibleName="Device Onboarding" cssClass="fa fa-hourglass-half fa-fw" url="/ui/deviceonboarding/"/>
+    </Services>
+</menu>

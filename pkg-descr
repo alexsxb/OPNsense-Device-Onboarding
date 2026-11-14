@@ -1,0 +1,9 @@
+Device Onboarding gives devices that appear for the first time in a DHCP pool
+a short, time-limited internet access window (for example 10 minutes),
+so that IoT devices can finish their cloud based setup. Afterwards the
+regular firewall policy applies again.
+
+Newly seen MAC addresses within the configured address pool are added to
+a pf table in the "deviceonboarding" anchor. The entries are removed again
+after the configured duration. Known devices never get a second window
+unless they are explicitly forgotten.

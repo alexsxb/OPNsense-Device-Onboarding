@@ -1,0 +1,5 @@
+{% if helpers.exists('OPNsense.deviceonboarding.enabled') and OPNsense.deviceonboarding.enabled == '1' %}
+deviceonboarding_enable="YES"
+{% else %}
+deviceonboarding_enable="NO"
+{% endif %}

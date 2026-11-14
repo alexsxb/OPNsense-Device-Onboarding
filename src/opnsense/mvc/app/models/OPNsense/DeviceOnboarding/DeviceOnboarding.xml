@@ -1,0 +1,64 @@
+<model>
+    <mount>//OPNsense/deviceonboarding</mount>
+    <version>1.0.0</version>
+    <description>Device Onboarding: temporary internet access for newly seen devices, permanent access via firewall aliases</description>
+    <items>
+        <enabled type="BooleanField">
+            <Default>0</Default>
+            <Required>Y</Required>
+        </enabled>
+        <interface type="InterfaceField">
+            <Required>N</Required>
+            <Multiple>N</Multiple>
+        </interface>
+        <pool_start type="NetworkField">
+            <Required>N</Required>
+            <NetMaskAllowed>N</NetMaskAllowed>
+            <AddressFamily>ipv4</AddressFamily>
+        </pool_start>
+        <pool_end type="NetworkField">
+            <Required>N</Required>
+            <NetMaskAllowed>N</NetMaskAllowed>
+            <AddressFamily>ipv4</AddressFamily>
+        </pool_end>
+        <duration type="IntegerField">
+            <Default>10</Default>
+            <MinimumValue>1</MinimumValue>
+            <MaximumValue>1440</MaximumValue>
+            <Required>Y</Required>
+        </duration>
+        <internal_networks type="NetworkField">
+            <Default>10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,169.254.0.0/16</Default>
+            <Required>Y</Required>
+            <AsList>Y</AsList>
+            <FieldSeparator>,</FieldSeparator>
+            <AddressFamily>ipv4</AddressFamily>
+        </internal_networks>
+        <kill_states type="BooleanField">
+            <Default>1</Default>
+            <Required>Y</Required>
+        </kill_states>
+        <log type="BooleanField">
+            <Default>1</Default>
+            <Required>Y</Required>
+        </log>
+        <!-- permanent access: the plugin maintains these existing aliases and DHCP reservations -->
+        <alias_ipv4 type="TextField">
+            <Mask>/^[A-Za-z0-9_]{1,32}$/</Mask>
+        </alias_ipv4>
+        <alias_mac type="TextField">
+            <Mask>/^[A-Za-z0-9_]{1,32}$/</Mask>
+        </alias_mac>
+        <reserve_start type="NetworkField">
+            <NetMaskAllowed>N</NetMaskAllowed>
+            <AddressFamily>ipv4</AddressFamily>
+        </reserve_start>
+        <reserve_end type="NetworkField">
+            <NetMaskAllowed>N</NetMaskAllowed>
+            <AddressFamily>ipv4</AddressFamily>
+        </reserve_end>
+        <reserve_domain type="TextField">
+            <Mask>/^[a-z0-9]([a-z0-9.-]{0,61}[a-z0-9])?$/</Mask>
+        </reserve_domain>
+    </items>
+</model>

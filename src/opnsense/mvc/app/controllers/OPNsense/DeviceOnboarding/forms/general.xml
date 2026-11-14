@@ -1,0 +1,85 @@
+<form>
+    <field>
+        <id>deviceonboarding.enabled</id>
+        <label>Enable</label>
+        <type>checkbox</type>
+        <help>Give devices that appear for the first time in the DHCP pool a temporary internet access window (Dnsmasq DHCP required).</help>
+    </field>
+    <field>
+        <id>deviceonboarding.interface</id>
+        <label>Interface</label>
+        <type>dropdown</type>
+        <help>Interface the new devices are connected to, typically a dedicated IoT network.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.pool_start</id>
+        <label>Pool start</label>
+        <type>text</type>
+        <help>First address of the dynamic DHCP range. Only leases inside the pool are considered, reserved addresses outside of it never get a window.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.pool_end</id>
+        <label>Pool end</label>
+        <type>text</type>
+        <help>Last address of the dynamic DHCP range.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.duration</id>
+        <label>Duration (minutes)</label>
+        <type>text</type>
+        <help>How long a newly seen device may reach the internet.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.internal_networks</id>
+        <label>Excluded networks</label>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Destinations that stay blocked during the window (internal networks).</help>
+    </field>
+    <field>
+        <id>deviceonboarding.kill_states</id>
+        <label>Kill states on close</label>
+        <type>checkbox</type>
+        <help>Drop open connections of the device when its window closes.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.log</id>
+        <label>Log</label>
+        <type>checkbox</type>
+        <help>Log traffic passed by the setup rule in the firewall log.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Permanent access</label>
+    </field>
+    <field>
+        <id>deviceonboarding.alias_ipv4</id>
+        <label>IPv4 alias</label>
+        <type>text</type>
+        <help>Existing host alias referenced by your firewall rule that grants permanent IPv4 internet access. The plugin adds and removes reserved addresses here. Leave empty to disable permanent access management.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.alias_mac</id>
+        <label>MAC alias</label>
+        <type>text</type>
+        <help>Existing MAC alias referenced by your firewall rule for (IPv6) internet access. The plugin adds and removes MAC addresses here.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.reserve_start</id>
+        <label>Reservation range start</label>
+        <type>text</type>
+        <help>Permanent devices get a fixed Dnsmasq DHCP reservation. The next free address in this range is used. Keep the range outside of the dynamic pool.</help>
+    </field>
+    <field>
+        <id>deviceonboarding.reserve_end</id>
+        <label>Reservation range end</label>
+        <type>text</type>
+    </field>
+    <field>
+        <id>deviceonboarding.reserve_domain</id>
+        <label>Reservation domain</label>
+        <type>text</type>
+        <help>Optional domain of new reservations (device name becomes host.domain).</help>
+    </field>
+</form>

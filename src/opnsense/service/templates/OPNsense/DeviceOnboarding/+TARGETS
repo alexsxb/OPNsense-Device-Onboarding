@@ -1,0 +1,2 @@
+deviceonboarding:/etc/rc.conf.d/deviceonboarding
+deviceonboarding.json:/usr/local/etc/deviceonboarding/deviceonboarding.json

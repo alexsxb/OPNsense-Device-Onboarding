@@ -1,0 +1,9 @@
+<acl>
+    <page-services-deviceonboarding>
+        <name>Services: Device Onboarding</name>
+        <patterns>
+            <pattern>ui/deviceonboarding/*</pattern>
+            <pattern>api/deviceonboarding/*</pattern>
+        </patterns>
+    </page-services-deviceonboarding>
+</acl>

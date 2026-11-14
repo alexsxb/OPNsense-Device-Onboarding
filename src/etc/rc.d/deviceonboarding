@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+# PROVIDE: deviceonboarding
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+#
+# Device Onboarding watcher (OPNsense plugin os-device-onboarding).
+# daemon(8) supervises watch.py (-r restarts it after a crash). A SIGTERM to
+# the supervisor is forwarded to watch.py, which then closes all windows.
+
+. /etc/rc.subr
+
+name=deviceonboarding
+rcvar=deviceonboarding_enable
+
+load_rc_config $name
+
+: ${deviceonboarding_enable:="NO"}
+
+pidfile="/var/run/${name}.pid"
+script="/usr/local/opnsense/scripts/deviceonboarding/watch.py"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+status_cmd="${name}_status"
+extra_commands="status"
+
+deviceonboarding_running()
+{
+	[ -f "${pidfile}" ] && kill -0 "$(cat "${pidfile}")" 2>/dev/null
+}
+
+deviceonboarding_start()
+{
+	if deviceonboarding_running; then
+		echo "${name} already running as pid $(cat "${pidfile}")."
+		return 0
+	fi
+	if ! grep -q '"enabled": true' /usr/local/etc/deviceonboarding/deviceonboarding.json 2>/dev/null; then
+		echo "${name}: not enabled or configuration missing, apply the settings first." >&2
+		return 1
+	fi
+	/usr/sbin/daemon -f -r -S -T "${name}" -P "${pidfile}" "${script}"
+	echo "Starting ${name}."
+}
+
+deviceonboarding_stop()
+{
+	if ! deviceonboarding_running; then
+		echo "${name} is not running."
+		return 0
+	fi
+	pid="$(cat "${pidfile}")"
+	kill -TERM "${pid}"
+	for i in 1 2 3 4 5 6 7 8 9 10; do
+		kill -0 "${pid}" 2>/dev/null || break
+		sleep 1
+	done
+	rm -f "${pidfile}"
+	echo "Stopped ${name}."
+}
+
+deviceonboarding_status()
+{
+	if deviceonboarding_running; then
+		echo "${name} is running as pid $(cat "${pidfile}")."
+	else
+		echo "${name} is not running."
+		return 1
+	fi
+}
+
+run_rc_command "$1"

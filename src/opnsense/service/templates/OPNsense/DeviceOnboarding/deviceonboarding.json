@@ -1,0 +1,10 @@
+{
+    "enabled": {{ 'true' if OPNsense.deviceonboarding.enabled|default('0') == '1' else 'false' }},
+    "interface": "{{ helpers.physical_interface(OPNsense.deviceonboarding.interface) if OPNsense.deviceonboarding.interface|default('') else '' }}",
+    "pool_start": "{{ OPNsense.deviceonboarding.pool_start|default('') }}",
+    "pool_end": "{{ OPNsense.deviceonboarding.pool_end|default('') }}",
+    "duration": {{ OPNsense.deviceonboarding.duration|default('10') }},
+    "internal_networks": "{{ OPNsense.deviceonboarding.internal_networks|default('10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,169.254.0.0/16') }}",
+    "kill_states": {{ 'true' if OPNsense.deviceonboarding.kill_states|default('1') == '1' else 'false' }},
+    "log": {{ 'true' if OPNsense.deviceonboarding.log|default('1') == '1' else 'false' }}
+}
