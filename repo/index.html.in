@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>os-device-onboarding – package repository</title>
+<style>
+  :root { --bg:#fbfbfa; --fg:#1d1d1b; --muted:#66645e; --line:#e3e1db; --code:#f1efea; --accent:#d94f00; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161615; --fg:#ecebe7; --muted:#a3a19a; --line:#34332f; --code:#22211f; --accent:#ff7a2e; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:48px 16px 64px; }
+  h1 { font-size:1.9rem; line-height:1.2; margin:0 0 4px; }
+  h2 { font-size:1.15rem; margin:40px 0 8px; padding-top:16px; border-top:1px solid var(--line); }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  .badge { display:inline-block; font-size:.85rem; padding:2px 10px; border:1px solid var(--line);
+           border-radius:999px; color:var(--muted); margin-right:6px; }
+  pre { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+        overflow-x:auto; font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em; }
+  a { color:var(--accent); }
+  ol li { margin-bottom:6px; }
+  .note { color:var(--muted); font-size:.95rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>os-device-onboarding</h1>
+  <p class="sub">OPNsense plugin: time-limited internet access for new devices, permanent access via aliases.</p>
+  <p><span class="badge">version %%VERSION%%</span><span class="badge">built %%DATE%%</span><span class="badge">signed repository</span></p>
+
+  <p>This is a <code>pkg(8)</code> repository for the plugin. After adding it once, the plugin can be
+  installed and updated from the OPNsense GUI like any other plugin.
+  Source code and documentation: <a href="https://github.com/alexsxb/OPNsense-Device-Onboarding">GitHub</a>.</p>
+
+  <h2>1. Add the repository (once)</h2>
+  <p>On the OPNsense console or via SSH, as root:</p>
+<pre>mkdir -p /usr/local/etc/pkg/keys
+fetch -o /usr/local/etc/pkg/keys/device-onboarding.pub \
+  https://alexsxb.github.io/OPNsense-Device-Onboarding/device-onboarding.pub
+fetch -o /usr/local/etc/pkg/repos/device-onboarding.conf \
+  https://alexsxb.github.io/OPNsense-Device-Onboarding/device-onboarding.conf
+pkg update -r device-onboarding</pre>
+
+  <h2>2. Install</h2>
+  <ol>
+    <li><strong>System → Firmware → Plugins</strong>, search for <code>os-device-onboarding</code>, click <strong>+</strong>.<br>
+        Or on the console: <code>pkg install os-device-onboarding</code></li>
+    <li>Open <strong>Services → Device Onboarding</strong>, select interface and DHCP pool, enable, <em>Apply</em>.</li>
+  </ol>
+  <p class="note">Updates appear in <em>System → Firmware → Updates</em> together with the OPNsense updates.</p>
+
+  <h2>Remove the repository</h2>
+<pre>pkg delete os-device-onboarding      # optional: remove the plugin
+rm /usr/local/etc/pkg/repos/device-onboarding.conf \
+   /usr/local/etc/pkg/keys/device-onboarding.pub</pre>
+
+  <h2>Verification</h2>
+  <p class="note">The repository catalogue is signed. <code>pkg</code> verifies it with the public key
+  <a href="device-onboarding.pub">device-onboarding.pub</a>; packages are checked against the catalogue checksums.
+  Requires Dnsmasq as DHCP server. Community software, not supported by the OPNsense project.</p>
+</main>
+</body>
+</html>

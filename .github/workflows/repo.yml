@@ -1,0 +1,51 @@
+name: Package repository
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build package and signed repository (FreeBSD)
+        uses: vmactions/freebsd-vm@v1
+        env:
+          PKG_REPO_KEY_B64: ${{ secrets.PKG_REPO_KEY_B64 }}
+        with:
+          release: "15"
+          usesh: true
+          envs: PKG_REPO_KEY_B64
+          prepare: |
+            pkg install -y git
+          run: |
+            umask 077
+            printf '%s' "$PKG_REPO_KEY_B64" | openssl base64 -d -A > /tmp/repo.key
+            sh scripts/build-repo.sh . site /tmp/repo.key
+            rm -f /tmp/repo.key
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

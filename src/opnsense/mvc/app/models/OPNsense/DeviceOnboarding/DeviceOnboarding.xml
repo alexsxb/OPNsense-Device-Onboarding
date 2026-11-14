@@ -1,6 +1,6 @@
 <model>
     <mount>//OPNsense/deviceonboarding</mount>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <description>Device Onboarding: temporary internet access for newly seen devices, permanent access via firewall aliases</description>
     <items>
         <enabled type="BooleanField">

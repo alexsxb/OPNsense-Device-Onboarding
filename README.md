@@ -108,8 +108,32 @@ the first packets of devices that are asleep most of the time.
 
 ## Installation
 
-The plugin is not part of the official OPNsense repository and is built on the
-firewall itself.
+The plugin is not part of the official OPNsense repository. It is available
+from its own signed package repository: https://alexsxb.github.io/OPNsense-Device-Onboarding/
+
+### From the package repository (recommended)
+
+Once, as root on the OPNsense console or via SSH:
+
+```sh
+mkdir -p /usr/local/etc/pkg/keys
+fetch -o /usr/local/etc/pkg/keys/device-onboarding.pub \
+  https://alexsxb.github.io/OPNsense-Device-Onboarding/device-onboarding.pub
+fetch -o /usr/local/etc/pkg/repos/device-onboarding.conf \
+  https://alexsxb.github.io/OPNsense-Device-Onboarding/device-onboarding.conf
+pkg update -r device-onboarding
+```
+
+Then install **os-device-onboarding** in **System → Firmware → Plugins** (or
+`pkg install os-device-onboarding`). Updates show up in **System → Firmware →
+Updates**. After a reinstallation of OPNsense, add the repository again; the
+settings are part of `config.xml` and come back with a configuration restore.
+
+The repository catalogue is signed; `pkg` verifies it with
+`device-onboarding.pub`. The package contains no compiled code and installs on
+any OPNsense version (`abi FreeBSD:*:*`).
+
+### From source
 
 1. Once, on the OPNsense host, fetch the plugins source tree:
    ```sh
@@ -122,16 +146,22 @@ firewall itself.
    The script copies the sources to `/usr/plugins/net/device-onboarding`, runs
    `make package` and installs the package with `pkg add`.
 
-Alternatively copy the repository to `/usr/plugins/net/device-onboarding` by
-hand and run `make package` there.
+### After installing
 
-Then open **Services → Device Onboarding**, select the interface and the DHCP
-pool, enable the plugin and click *Apply*.
+Open **Services → Device Onboarding**, select the interface and the DHCP pool,
+enable the plugin and click *Apply*.
 
-After a reinstallation of OPNsense the package has to be built again; the
-settings are part of `config.xml` and come back with a configuration restore.
+**Uninstall:** disable the plugin and apply, then `pkg delete os-device-onboarding`.
+To remove the repository as well, delete
+`/usr/local/etc/pkg/repos/device-onboarding.conf` and
+`/usr/local/etc/pkg/keys/device-onboarding.pub`.
 
-**Uninstall:** disable the plugin and apply, then `sudo pkg delete os-device-onboarding`.
+### Releases
+
+A tag `v*` triggers `.github/workflows/repo.yml`: the package is built in a
+FreeBSD VM with the OPNsense plugins framework (`scripts/build-repo.sh`), the
+repository is signed with the key from the secret `PKG_REPO_KEY_B64`
+(base64 of the PEM private key) and published with GitHub Pages.
 
 ## Settings
 
@@ -193,6 +223,7 @@ Runtime state (known devices, open windows) is kept in
 | `src/opnsense/service/templates/OPNsense/DeviceOnboarding/` | rc.conf.d and service configuration |
 | `src/etc/rc.d/deviceonboarding` | rc script |
 | `src/etc/inc/plugins.inc.d/deviceonboarding.inc` | service registration, firewall anchor |
+| `scripts/build-repo.sh`, `repo/`, `.github/workflows/repo.yml` | package repository build and GitHub Pages site |
 | `tests/test_common.py` | logic tests without OPNsense (`python3 tests/test_common.py`) |
 
 Screenshots show demo data.
