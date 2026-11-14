@@ -16,6 +16,8 @@ It is meant for the usual IoT workflow: plug in a new smart plug, camera or
 appliance, let it register for a few minutes, then decide whether it needs
 internet permanently, and keep it isolated otherwise.
 
+![Open setup windows](docs/screenshots/open-windows.png)
+
 ## Requirements
 
 - OPNsense 25.x / 26.x (developed and tested on 26.7)
@@ -49,6 +51,8 @@ new MAC in DHCP pool ──► watcher ──► pf anchor "deviceonboarding"
 - The plugin registers the anchor in the ruleset only while it is enabled.
 - IPv4 only. Addresses outside the pool (your reservations) never get a window.
 
+![Known devices](docs/screenshots/known-devices.png)
+
 ## Permanent access
 
 Create two aliases and the matching rules yourself, for example on the IoT
@@ -69,6 +73,10 @@ plugin settings. Then:
   closes the setup window. The device gets its new address with its next lease.
 - **Remove permanent access:** removes the device from both aliases and drops
   its connections. The reservation is kept.
+
+![Permanent access](docs/screenshots/permanent-access.png)
+
+![Grant permanent access](docs/screenshots/grant-dialog.png)
 
 Using a MAC alias for IPv6 is useful because devices form their IPv6 addresses
 themselves (SLAAC). For IPv4 a host alias with the fixed reservation is used: a
@@ -103,6 +111,8 @@ settings are part of `config.xml` and come back with a configuration restore.
 **Uninstall:** disable the plugin and apply, then `sudo pkg delete os-device-onboarding`.
 
 ## Settings
+
+![Settings](docs/screenshots/settings.png)
 
 | Setting | Meaning |
 |---|---|
@@ -157,6 +167,8 @@ Runtime state (known devices, open windows) is kept in
 | `src/etc/rc.d/deviceonboarding` | rc script |
 | `src/etc/inc/plugins.inc.d/deviceonboarding.inc` | service registration, firewall anchor |
 | `tests/test_common.py` | logic tests without OPNsense (`python3 tests/test_common.py`) |
+
+Screenshots show demo data.
 
 ## License
 
